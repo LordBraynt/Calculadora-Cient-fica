@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calculadora Científica</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: #0f172a;
+      color: #f8fafc;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .calculadora {
+      width: 100%;
+      max-width: 400px;
+      background-color: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45);
+    }
+
+    .topo {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .titulo {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #94a3b8;
+      letter-spacing: 0.3px;
+    }
+
+    .btn-modo {
+      background-color: #0f172a;
+      color: #38bdf8;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 5px 12px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    .btn-modo:hover {
+      border-color: #38bdf8;
+    }
+
+    .visor {
+      background-color: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 18px;
+      text-align: right;
+      min-height: 96px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      word-wrap: break-word;
+      word-break: break-all;
+    }
+
+    .historico {
+      font-size: 0.9rem;
+      color: #64748b;
+      min-height: 20px;
+    }
+
+    .expressao {
+      font-size: 1.9rem;
+      font-weight: 700;
+      color: #f8fafc;
+      margin-top: 6px;
+    }
+
+    .teclado {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+    }
+
+    button.tecla {
+      height: 48px;
+      border: none;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      transition: background-color 0.15s ease, transform 0.08s ease;
+    }
+
+    button.tecla:active {
+      transform: scale(0.96);
+    }
+
+    /* Estilos por categoria de tecla */
+    .cientifica {
+      background-color: #273549;
+      color: #cbd5e1;
+      font-size: 0.85rem;
+    }
+
+    .cientifica:hover {
+      background-color: #334155;
+    }
+
+    .numero {
+      background-color: #0f172a;
+      color: #f8fafc;
+      font-size: 1.05rem;
+    }
+
+    .numero:hover {
+      background-color: #162033;
+    }
+
+    .operador {
+      background-color: #1d4ed8;
+      color: #ffffff;
+      font-size: 1.1rem;
+    }
+
+    .operador:hover {
+      background-color: #2563eb;
+    }
+
+    .acao {
+      background-color: #7f1d1d;
+      color: #fecaca;
+    }
+
+    .acao:hover {
+      background-color: #991b1b;
+    }
+
+    .igual {
+      background-color: #059669;
+      color: #ffffff;
+      font-size: 1.2rem;
+    }
+
+    .igual:hover {
+      background-color: #10b981;
+    }
+  </style>
+</head>
+<body>
+  <main class="calculadora">
+    <div class="topo">
+      <span class="titulo">Calculadora Científica</span>
+      <button id="btn-modo" type="button" class="btn-modo" title="Alternar Graus e Radianos">DEG</button>
+    </div>
+
+    <section class="visor" aria-live="polite">
+      <div id="historico" class="historico"></div>
+      <div id="visor-principal" class="expressao">0</div>
+    </section>
+
+    <section class="teclado">
+      <!-- Linha 1: Funções científicas -->
+      <button type="button" class="tecla cientifica" data-valor="sin(">sin</button>
+      <button type="button" class="tecla cientifica" data-valor="cos(">cos</button>
+      <button type="button" class="tecla cientifica" data-valor="tan(">tan</button>
+      <button type="button" class="tecla cientifica" data-valor="log(">log</button>
+      <button type="button" class="tecla cientifica" data-valor="ln(">ln</button>
+
+      <!-- Linha 2: Potências, raízes e constantes -->
+      <button type="button" class="tecla cientifica" data-valor="√(">√</button>
+      <button type="button" class="tecla cientifica" data-valor="^">xʸ</button>
+      <button type="button" class="tecla cientifica" data-valor="^2">x²</button>
+      <button type="button" class="tecla cientifica" data-valor="π">π</button>
+      <button type="button" class="tecla cientifica" data-valor="e">e</button>
+
+      <!-- Linha 3: Parênteses, fatorial e controles -->
+      <button type="button" class="tecla cientifica" data-valor="(">(</button>
+      <button type="button" class="tecla cientifica" data-valor=")">)</button>
+      <button type="button" class="tecla cientifica" data-valor="!">n!</button>
+      <button type="button" class="tecla acao" data-acao="apagar">DEL</button>
+      <button type="button" class="tecla acao" data-acao="limpar">AC</button>
+
+      <!-- Linha 4 -->
+      <button type="button" class="tecla numero" data-valor="7">7</button>
+      <button type="button" class="tecla numero" data-valor="8">8</button>
+      <button type="button" class="tecla numero" data-valor="9">9</button>
+      <button type="button" class="tecla cientifica" data-valor="%">%</button>
+      <button type="button" class="tecla operador" data-valor="÷">÷</button>
+
+      <!-- Linha 5 -->
+      <button type="button" class="tecla numero" data-valor="4">4</button>
+      <button type="button" class="tecla numero" data-valor="5">5</button>
+      <button type="button" class="tecla numero" data-valor="6">6</button>
+      <button type="button" class="tecla operador" data-valor="×">×</button>
+      <button type="button" class="tecla operador" data-valor="-">−</button>
+
+      <!-- Linha 6 -->
+      <button type="button" class="tecla numero" data-valor="1">1</button>
+      <button type="button" class="tecla numero" data-valor="2">2</button>
+      <button type="button" class="tecla numero" data-valor="3">3</button>
+      <button type="button" class="tecla numero" data-valor="0">0</button>
+      <button type="button" class="tecla operador" data-valor="+">+</button>
+
+      <!-- Linha 7 -->
+      <button type="button" class="tecla numero" data-valor=".">.</button>
+      <button type="button" class="tecla cientifica" data-acao="inverso">1/x</button>
+      <button type="button" class="tecla cientifica" data-acao="sinal">+/−</button>
+      <button type="button" class="tecla igual" style="grid-column: span 2;" data-acao="calcular">=</button>
+    </section>
+  </main>
+
+  <script>
+    const visorPrincipal = document.getElementById("visor-principal");
+    const historico = document.getElementById("historico");
+    const btnModo = document.getElementById("btn-modo");
+    const teclas = document.querySelectorAll(".tecla");
+
+    let expressaoAtual = "";
+    let modoGraus = true; // true = DEG (Graus), false = RAD (Radianos)
+    let acabouDeCalcular = false;
+
+    // Alterna entre Graus (DEG) e Radianos (RAD)
+    btnModo.addEventListener("click", function () {
+      if (modoGraus) {
+        modoGraus = false;
+        btnModo.textContent = "RAD";
+      } else {
+        modoGraus = true;
+        btnModo.textContent = "DEG";
+      }
+    });
+
+    // Funções matemáticas auxiliares
+    function fatorial(n) {
+      if (n < 0 || !Number.isInteger(n)) {
+        return NaN;
+      }
+      if (n === 0 || n === 1) {
+        return 1;
+      }
+      let resultado = 1;
+      for (let i = 2; i <= n; i++) {
+        resultado *= i;
+      }
+      return resultado;
+    }
+
+    function seno(x) {
+      const rad = modoGraus ? (x * Math.PI) / 180 : x;
+      return Math.sin(rad);
+    }
+
+    function cosseno(x) {
+      const rad = modoGraus ? (x * Math.PI) / 180 : x;
+      return Math.cos(rad);
+    }
+
+    function tangente(x) {
+      if (modoGraus && Math.abs(x % 180) === 90) {
+        return NaN;
+      }
+      const rad = modoGraus ? (x * Math.PI) / 180 : x;
+      return Math.tan(rad);
+    }
+
+    function atualizarVisor() {
+      if (expressaoAtual === "") {
+        visorPrincipal.textContent = "0";
+      } else {
+        visorPrincipal.textContent = expressaoAtual;
+      }
+    }
+
+    function inserirValor(valor) {
+      const operadores = ["+", "-", "×", "÷", "^", "%"];
+
+      if (acabouDeCalcular) {
+        if (operadores.includes(valor)) {
+          acabouDeCalcular = false;
+        } else {
+          expressaoAtual = "";
+          acabouDeCalcular = false;
+        }
+      }
+
+      if (expressaoAtual === "Erro") {
+        expressaoAtual = "";
+      }
+
+      expressaoAtual += valor;
+      atualizarVisor();
+    }
+
+    function limparTudo() {
+      expressaoAtual = "";
+      historico.textContent = "";
+      acabouDeCalcular = false;
+      atualizarVisor();
+    }
+
+    function apagarUltimo() {
+      if (expressaoAtual === "Erro" || acabouDeCalcular) {
+        limparTudo();
+        return;
+      }
+
+      const funcoes = ["sin(", "cos(", "tan(", "log(", "ln(", "√("];
+      let removeuFuncao = false;
+
+      for (let i = 0; i < funcoes.length; i++) {
+        if (expressaoAtual.endsWith(funcoes[i])) {
+          expressaoAtual = expressaoAtual.slice(0, -funcoes[i].length);
+          removeuFuncao = true;
+          break;
+        }
+      }
+
+      if (!removeuFuncao) {
+        expressaoAtual = expressaoAtual.slice(0, -1);
+      }
+
+      atualizarVisor();
+    }
+
+    function calcularResultado() {
+      if (expressaoAtual === "" || expressaoAtual === "Erro") {
+        return;
+      }
+
+      try {
+        let formula = expressaoAtual;
+
+        // Fecha parênteses abertos automaticamente se o usuário esqueceu
+        const abertos = (formula.match(/\(/g) || []).length;
+        const fechados = (formula.match(/\)/g) || []).length;
+        if (abertos > fechados) {
+          formula += ")".repeat(abertos - fechados);
+        }
+
+        // Multiplicação implícita (ex: 2π, 2(3+4), 2sin(30))
+        formula = formula
+          .replace(/(\d|\))(?=(π|e|\(|sin\(|cos\(|tan\(|log\(|ln\(|√\())/g, "$1*")
+          .replace(/(π|e)(?=(\d|\())/g, "$1*");
+
+        // Converte símbolos visuais para JavaScript
+        formula = formula
+          .replace(/×/g, "*")
+          .replace(/÷/g, "/")
+          .replace(/\^/g, "**")
+          .replace(/%/g, "/100")
+          .replace(/(\d+)!/g, "fatorial($1)")
+          .replace(/√\(/g, "Math.sqrt(")
+          .replace(/sin\(/g, "seno(")
+          .replace(/cos\(/g, "cosseno(")
+          .replace(/tan\(/g, "tangente(")
+          .replace(/log\(/g, "Math.log10(")
+          .replace(/ln\(/g, "Math.log(")
+          .replace(/π/g, "Math.PI")
+          .replace(/e/g, "Math.E");
+
+        // Executa a expressão matemática de forma controlada
+        const resultadoBruto = Function(
+          "seno",
+          "cosseno",
+          "tangente",
+          "fatorial",
+          "return (" + formula + ");"
+        )(seno, cosseno, tangente, fatorial);
+
+        if (typeof resultadoBruto !== "number" || !isFinite(resultadoBruto) || isNaN(resultadoBruto)) {
+          historico.textContent = expressaoAtual + " =";
+          expressaoAtual = "Erro";
+        } else {
+          // Corrige imprecisões clássicas de ponto flutuante (ex: sin(30) = 0.49999999999999994)
+          const resultadoFormatado = Number(resultadoBruto.toPrecision(12)).toString();
+          historico.textContent = expressaoAtual + " =";
+          expressaoAtual = resultadoFormatado;
+        }
+
+        acabouDeCalcular = true;
+        atualizarVisor();
+      } catch (erro) {
+        historico.textContent = expressaoAtual + " =";
+        expressaoAtual = "Erro";
+        acabouDeCalcular = true;
+        atualizarVisor();
+      }
+    }
+
+    // Eventos de clique nos botões
+    teclas.forEach(function (tecla) {
+      tecla.addEventListener("click", function () {
+        const valor = tecla.getAttribute("data-valor");
+        const acao = tecla.getAttribute("data-acao");
+
+        if (valor) {
+          inserirValor(valor);
+        } else if (acao === "limpar") {
+          limparTudo();
+        } else if (acao === "apagar") {
+          apagarUltimo();
+        } else if (acao === "calcular") {
+          calcularResultado();
+        } else if (acao === "inverso") {
+          if (expressaoAtual !== "" && expressaoAtual !== "Erro") {
+            expressaoAtual = "1/(" + expressaoAtual + ")";
+            calcularResultado();
+          }
+        } else if (acao === "sinal") {
+          if (expressaoAtual !== "" && expressaoAtual !== "Erro") {
+            if (expressaoAtual.startsWith("-")) {
+              expressaoAtual = expressaoAtual.slice(1);
+            } else {
+              expressaoAtual = "-" + expressaoAtual;
+            }
+            atualizarVisor();
+          }
+        }
+      });
+    });
+
+    // Suporte ao teclado físico (PC)
+    document.addEventListener("keydown", function (evento) {
+      const tecla = evento.key;
+
+      if ((tecla >= "0" && tecla <= "9") || tecla === "." || tecla === "(" || tecla === ")" || tecla === "^" || tecla === "%") {
+        inserirValor(tecla);
+      } else if (tecla === "+" || tecla === "-") {
+        inserirValor(tecla);
+      } else if (tecla === "*") {
+        inserirValor("×");
+      } else if (tecla === "/") {
+        evento.preventDefault();
+        inserirValor("÷");
+      } else if (tecla === "Enter" || tecla === "=") {
+        evento.preventDefault();
+        calcularResultado();
+      } else if (tecla === "Backspace") {
+        apagarUltimo();
+      } else if (tecla === "Escape") {
+        limparTudo();
+      }
+    });
+  </script>
+</body>
+</html>
